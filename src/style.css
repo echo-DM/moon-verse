@@ -1,0 +1,688 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&display=swap");
+:root {
+  font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
+  color: #e3e5d5;
+  background: #0d252d;
+  font-synthesis: none;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  font-optical-sizing: auto;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+button {
+  background: none;
+  border: 0;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 1px solid #e1cb97;
+  outline-offset: 6px;
+}
+button:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+.app {
+  min-width: 1024px;
+  height: 100svh;
+  min-height: 740px;
+  position: relative;
+  overflow: hidden;
+  background: #15343d;
+}
+.world {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+}
+.world canvas {
+  display: block;
+}
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(6, 23, 28, 0.95) 0%,
+      rgba(7, 25, 30, 0.84) 20%,
+      rgba(9, 28, 34, 0.24) 45%,
+      transparent 65%
+    ),
+    linear-gradient(
+      0deg,
+      #071b22 0%,
+      rgba(7, 26, 33, 0.98) 13%,
+      rgba(8, 28, 34, 0.3) 30%,
+      transparent 47%,
+      rgba(7, 22, 28, 0.18) 100%
+    );
+}
+.scene-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: #102b33;
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+.transitioning .scene-veil {
+  opacity: 0.9;
+}
+.header {
+  position: absolute;
+  left: 4.4%;
+  right: 4.4%;
+  top: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  font-size: 23px;
+  letter-spacing: 4px;
+}
+.brand-icon {
+  width: 41px;
+  height: 41px;
+  border: 1px solid #b5bd9c66;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #dace9f;
+}
+.brand small {
+  display: block;
+  font-family: Arial, sans-serif;
+  font-size: 8px;
+  letter-spacing: 3px;
+  margin-top: 6px;
+  color: #97aaa7;
+}
+.edition {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 5px;
+  color: #c1ccc3b0;
+  margin-left: 2%;
+}
+.edition span {
+  display: block;
+  font:
+    8px Arial,
+    sans-serif;
+  letter-spacing: 2.8px;
+  margin-top: 10px;
+  opacity: 0.45;
+}
+.poem-button {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 12px;
+  letter-spacing: 2px;
+  border: 1px solid #b2c5bd38;
+  border-radius: 3px;
+  padding: 12px 18px;
+  background: #0e2a2e35;
+  transition: background 0.2s;
+}
+.poem-button:hover {
+  background: #78948725;
+}
+.story {
+  position: absolute;
+  left: 7%;
+  top: 21%;
+  width: 410px;
+  pointer-events: none;
+}
+.story button {
+  pointer-events: auto;
+}
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: #aabdb1;
+}
+.tiny-line {
+  width: 23px;
+  height: 1px;
+  background: #aeb496;
+}
+.work-title {
+  font-size: 14px;
+  letter-spacing: 4px;
+  margin-top: 23px;
+  color: #c0c7b6;
+}
+.work-title > span {
+  font-size: 10px;
+  margin-left: 18px;
+  letter-spacing: 2px;
+  color: #7e9794;
+}
+.chapter-kicker {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: #bfc2a1;
+  margin: 31px 0 17px;
+}
+.chapter-kicker > span {
+  padding: 0 7px;
+  color: #637f7c;
+}
+h1 {
+  font-weight: 400;
+  font-size: clamp(32px, 3.05vw, 50px);
+  line-height: 1.65;
+  letter-spacing: 5px;
+  margin: 0;
+  text-shadow: 0 2px 25px #05161966;
+}
+h1 span {
+  display: block;
+  white-space: nowrap;
+}
+.verse-rule {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 26px;
+}
+.verse-rule i {
+  width: 31px;
+  height: 1px;
+  background: #c3b68490;
+}
+.verse-rule span {
+  font:
+    8px Arial,
+    sans-serif;
+  letter-spacing: 2.2px;
+  color: #9cafaa;
+}
+.note {
+  max-width: 285px;
+  font-size: 11px;
+  line-height: 2.3;
+  letter-spacing: 1.1px;
+  color: #a2b5ae;
+  margin: 21px 0 0;
+}
+.continue {
+  display: flex;
+  align-items: center;
+  gap: 29px;
+  margin-top: 25px;
+  padding: 8px 0;
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: #dccca0;
+}
+.continue svg {
+  transition: transform 0.2s;
+}
+.continue:hover svg {
+  transform: translateX(7px);
+}
+.verse-content {
+  animation: verseIn 0.8s ease both;
+}
+@keyframes verseIn {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.scene-caption {
+  position: absolute;
+  right: 8%;
+  top: 53%;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  writing-mode: vertical-rl;
+  pointer-events: none;
+}
+.scene-caption > span:not(.caption-line) {
+  font-size: 14px;
+  letter-spacing: 7px;
+  color: #d1d7c4;
+}
+.caption-line {
+  height: 33px;
+  width: 1px;
+  background: #d1cbaa65;
+}
+.scene-caption small {
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: #adbbb0;
+}
+.tools {
+  position: absolute;
+  right: 3.2%;
+  bottom: 32%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #9cb8b322;
+  border-radius: 4px;
+  background: #0b242b55;
+  backdrop-filter: blur(10px);
+}
+.tools button {
+  width: 38px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  color: #b0c4bc;
+}
+.tools button + button {
+  border-top: 1px solid #91b3ad16;
+}
+.tools button:hover {
+  background: #b0c4bc18;
+  color: #eee6c9;
+}
+.help {
+  position: absolute;
+  right: 7%;
+  bottom: 33%;
+  background: #0c272eed;
+  border: 1px solid #7698924a;
+  padding: 22px 37px 22px 22px;
+  font-size: 11px;
+  line-height: 2.4;
+  letter-spacing: 1px;
+  border-radius: 4px;
+}
+.help button {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+}
+.bottom {
+  position: absolute;
+  left: 4.4%;
+  right: 4.4%;
+  bottom: 22px;
+}
+.nav-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 20px;
+  font-size: 10px;
+  color: #bdc9bd;
+  letter-spacing: 2px;
+}
+.nav-heading > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.nav-heading i {
+  width: 4px;
+  height: 4px;
+  background: #d7c392;
+  transform: rotate(45deg);
+}
+.nav-hint {
+  font-size: 9px;
+  color: #819d98;
+  margin-left: auto;
+  margin-right: 32px;
+}
+.arrows {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font:
+    10px Arial,
+    sans-serif;
+  letter-spacing: 2px;
+}
+.arrows em {
+  font-style: normal;
+  color: #64837f;
+}
+.arrows button {
+  padding: 5px;
+  display: grid;
+  place-items: center;
+  color: #c8d4c6;
+}
+.chapter-nav {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+.chapter {
+  min-width: 0;
+  text-align: left;
+  position: relative;
+  border-top: 1px solid #7d9b9440;
+  padding: 16px 17px 19px;
+  background: linear-gradient(180deg, #49655e08, #49655e06);
+  transition:
+    background 0.3s,
+    border-color 0.3s;
+}
+.chapter:hover {
+  background: #809d8712;
+  border-color: #adba9c80;
+}
+.chapter.active {
+  background: linear-gradient(135deg, #99a48a20, #7185750b);
+  border-color: #d4c398;
+}
+.chapter-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chapter-number {
+  font:
+    9px Arial,
+    sans-serif;
+  letter-spacing: 2px;
+  color: #7d9b95;
+}
+.chapter-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #cfc29a;
+  opacity: 0;
+}
+.active .chapter-dot {
+  opacity: 1;
+  box-shadow: 0 0 12px #cfc29a55;
+}
+.chapter-title {
+  display: block;
+  font-size: 15px;
+  letter-spacing: 3px;
+  margin-top: 15px;
+  color: #b6c7bc;
+}
+.active .chapter-title {
+  color: #e4d7b4;
+}
+.chapter-line {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 1px;
+  margin-top: 9px;
+  color: #7e9991;
+}
+.colophon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #75958d22;
+  margin-top: 20px;
+  padding-top: 17px;
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: #68867f;
+}
+.colophon > span:nth-child(2) {
+  opacity: 0.7;
+}
+.mini-moon {
+  font-size: 13px;
+  vertical-align: middle;
+  margin-left: 7px;
+}
+.loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  font-size: 20px;
+  letter-spacing: 6px;
+  background: #102b33;
+  z-index: 2;
+  pointer-events: none;
+}
+.loading span {
+  font:
+    9px Arial,
+    sans-serif;
+  letter-spacing: 3px;
+  color: #91aaa0;
+}
+.loading-secondary {
+  z-index: 1;
+}
+.webgl-fallback {
+  position: absolute;
+  left: 45%;
+  top: 42%;
+  right: 12%;
+  text-align: center;
+  color: #d8d8bd;
+  font-size: 17px;
+  line-height: 2.3;
+}
+.webgl-fallback small {
+  font-size: 12px;
+}
+.poem-dialog {
+  padding: 0;
+  color: #dce1ce;
+  background: #112d33;
+  border: 1px solid #8da59655;
+  border-radius: 5px;
+  width: min(620px, 92vw);
+  max-height: 88svh;
+  box-shadow: 0 25px 100px #0008;
+}
+.poem-dialog::backdrop {
+  background: #04151bba;
+  backdrop-filter: blur(14px);
+}
+.poem-sheet {
+  position: relative;
+  padding: 40px 50px;
+  text-align: center;
+}
+.dialog-close {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  padding: 8px;
+}
+.poem-sheet .eyebrow {
+  justify-content: center;
+  font-size: 9px;
+}
+.poem-sheet h2 {
+  font-weight: 400;
+  font-size: 31px;
+  letter-spacing: 8px;
+  margin: 22px 0 10px;
+}
+.poem-author {
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: #b9bca2;
+}
+.preface {
+  font-size: 10px;
+  color: #849e94;
+  line-height: 2;
+  margin: 24px auto;
+  max-width: 320px;
+}
+.full-poem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.full-poem button {
+  padding: 13px 5px;
+  border-radius: 3px;
+}
+.full-poem button:hover,
+.full-poem button.current {
+  background: #899c7614;
+}
+.full-poem small {
+  display: block;
+  font:
+    8px Arial,
+    sans-serif;
+  letter-spacing: 2px;
+  color: #9aab8d;
+  margin-bottom: 8px;
+}
+.full-poem span {
+  display: block;
+  font-size: 14px;
+  line-height: 2;
+  letter-spacing: 1px;
+}
+.poem-foot {
+  font-size: 10px;
+  color: #90a393;
+  margin-top: 24px;
+  letter-spacing: 3px;
+}
+button {
+  transition:
+    color 0.2s,
+    background 0.2s;
+}
+@media (min-width: 1600px) {
+  .story {
+    top: 23%;
+    left: 8%;
+  }
+  .bottom {
+    bottom: 28px;
+  }
+  .chapter {
+    padding: 20px 22px 24px;
+  }
+  .chapter-title {
+    font-size: 17px;
+  }
+  .note {
+    font-size: 12px;
+  }
+  .header {
+    top: 42px;
+  }
+}
+@media (max-height: 850px) {
+  .app {
+    min-height: 680px;
+  }
+  .story {
+    top: 18%;
+  }
+  .work-title {
+    margin-top: 16px;
+  }
+  .chapter-kicker {
+    margin-top: 23px;
+  }
+  h1 {
+    font-size: 37px;
+  }
+  .verse-rule {
+    margin-top: 20px;
+  }
+  .note {
+    margin-top: 15px;
+  }
+  .continue {
+    margin-top: 15px;
+  }
+  .chapter {
+    padding: 12px 15px 14px;
+  }
+  .chapter-title {
+    margin-top: 10px;
+  }
+  .nav-heading {
+    margin-bottom: 13px;
+  }
+  .colophon {
+    margin-top: 13px;
+    padding-top: 12px;
+  }
+}
+@media (max-width: 1050px) {
+  .story {
+    left: 5%;
+  }
+  h1 {
+    font-size: 35px;
+    letter-spacing: 3px;
+  }
+  .chapter {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+  .chapter-title {
+    font-size: 13px;
+    letter-spacing: 2px;
+  }
+  .chapter-line {
+    font-size: 8px;
+  }
+  .edition {
+    display: none;
+  }
+  .scene-caption {
+    right: 10%;
+  }
+  .colophon > span:nth-child(2) {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
