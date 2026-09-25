@@ -50,6 +50,7 @@ class WorldLoaderBoundary extends Component<
 export default function App() {
   const [selected, setSelected] = useState(0),
     [traveling, setTraveling] = useState(false),
+    [settled, setSettled] = useState(false),
     [overviewMode, setOverviewMode] = useState(false),
     [reset, setReset] = useState(0),
     [ready, setReady] = useState(false),
@@ -63,6 +64,7 @@ export default function App() {
     nav = useRef<HTMLDivElement>(null);
   const onReady = useCallback(() => setReady(true), []);
   const go = useCallback((i: number) => {
+    setSettled(false);
     setSelected(i);
     setOverviewMode(false);
     setReset((v) => v + 1);
@@ -95,7 +97,7 @@ export default function App() {
   };
   const chapter = chapters[selected];
   return (
-    <main className="app">
+    <main className={`app ${selected === 6 && settled && !overviewMode ? "finale-rest" : ""}`}>
       <WorldLoaderBoundary onError={onReady}>
         <Suspense
           fallback={
@@ -111,6 +113,7 @@ export default function App() {
             reduced={reduced}
             paused={paused}
             onTravel={setTraveling}
+            onSettle={setSettled}
             onReady={onReady}
           />
         </Suspense>

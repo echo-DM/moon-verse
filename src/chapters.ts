@@ -68,12 +68,16 @@ export const chapters: Chapter[] = [
     verse: "但愿人长久，\n千里共婵娟。",
     lines: ["但愿人长久，千里共婵娟。"],
     note: "山河相隔，月色相连。愿此刻的清辉，也落在你身旁。",
-    camera: [77, 30, -5],
-    target: [40, 5, -51],
+    camera: [105, 27, 64],
+    target: [13, 22, -94],
   },
 ];
 export const numerals = ["一", "二", "三", "四", "五", "六", "七"];
 export const overview = {
   camera: [105, 110, 150] as [number, number, number],
   target: [0, 10, -12] as [number, number, number],
+};
+export const finaleCloseup = {
+  camera: [62, 8, -39] as [number, number, number],
+  target: [46, 3, -63] as [number, number, number],
 };

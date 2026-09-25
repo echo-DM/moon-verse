@@ -670,6 +670,24 @@ button {
     display: none;
   }
 }
+.header, .bottom, .tools, .scene-caption {
+  transition: opacity 1.8s ease;
+}
+.finale-rest .header,
+.finale-rest .bottom,
+.finale-rest .tools,
+.finale-rest .scene-caption {
+  opacity: 0.42;
+}
+.finale-rest .header:hover,
+.finale-rest .header:focus-within,
+.finale-rest .bottom:hover,
+.finale-rest .bottom:focus-within,
+.finale-rest .tools:hover,
+.finale-rest .tools:focus-within {
+  opacity: 1;
+  transition-duration: 0.25s;
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

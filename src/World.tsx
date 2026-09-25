@@ -17,7 +17,7 @@ import {
   Sparkles,
 } from "@react-three/drei";
 import * as THREE from "three";
-import { chapters, overview } from "./chapters";
+import { chapters, overview, finaleCloseup } from "./chapters";
 
 type Block = {
   p: [number, number, number];
@@ -364,11 +364,27 @@ function Landmark({ kind }: { kind: number }) {
       b.push(...person(3, 1.9, 2, "sit"));
     } else if (kind === 6) {
       b.push(
-        ...architecture(-12, 1, 2, 0.9, 1, true),
-        ...architecture(11, 1, -8, 1, 2, true),
+        ...architecture(14, 1, -2, 0.9, 1, true),
+        ...architecture(2, 1, -81, 1, 1, true),
       );
-      b.push(...tree(-17, 1, 0, 1.3, 98), ...tree(16, 1, -7, 1.3, 100, true));
-      b.push(...person(-9, 1.2, 5), ...person(8, 1.2, -3));
+      b.push(...tree(19, 1, -4, 1.3, 98), ...tree(-4, 1, -83, 1.3, 100, true));
+      b.push(...person(2, 1.8, -78.7));
+      // A finely tiled terrace opens north toward the distant light.
+      for (let x = 5; x <= 14; x += 0.45)
+        for (let z = -15; z <= -6; z += 0.45)
+          b.push({ p: [x, 1.05, z], s: [0.43, 0.3, 0.43], c: stone[Math.abs(Math.round(x + z)) % 4] });
+      for (let x = 5; x <= 14; x += 0.75) {
+        b.push({ p: [x, 1.65, -15], s: [0.12, 1.1, 0.12], c: "#93a69b" });
+        b.push({ p: [x, 2.15, -15], s: [0.78, 0.12, 0.16], c: "#bec6ac" });
+      }
+      for (const x of [5, 14])
+        for (const z of [-15, -6])
+          b.push({ p: [x, 0.3, z], s: [0.35, 1.5, 0.35], c: "#526a69" });
+      b.push({ p: [12, 1.85, -12], s: [1.45, 0.16, 0.85], c: "#80674c" });
+      for (const x of [11.45, 12.55])
+        b.push({ p: [x, 1.5, -12], s: [0.12, 0.65, 0.6], c: "#66543e" });
+      b.push({ p: [11.7, 2, -12], s: [0.18, 0.2, 0.18], c: "#dfcba1" });
+      b.push({ p: [12.3, 2.12, -12], s: [0.23, 0.42, 0.23], c: "#a9b9ab" });
     } else {
       b.push(...architecture(8, 1, -1, 1.1, kind === 0 ? 2 : 1));
       b.push(...bridge(-3, 3, 17));
@@ -404,7 +420,7 @@ function Landscape() {
       const cx = -85 + m * 14,
         cz = -88 - (m % 3) * 9,
         radius = 8 + rand() * 5,
-        peak = 10 + rand() * 15;
+        peak = (cx > 20 && cx < 67 ? 2 : 10) + rand() * (cx > 20 && cx < 67 ? 2 : 15);
       for (let x = -radius; x < radius; x += 0.7)
         for (let z = -radius; z < radius; z += 0.7) {
           const d = Math.sqrt(x * x + z * z) / radius;
@@ -430,12 +446,12 @@ function Landscape() {
       ...shore.map(([x, z]): [number, number, number] => [x, z, 6.8]),
       [-25, 21, 9], [-46, 18, 6], [-51, -1, 5], [-3, 8, 11],
       [25, -8, 8], [44, 26, 9], [23, 23, 6], [7, -42, 9],
-      [-14, -45, 6], [28, -48, 7], [51, -58, 8],
+      [-14, -45, 6], [28, -48, 7], [51, -58, 10], [42, -132, 9],
       [30, 3, 6.8], [37, 14, 6.8],
     ];
     // One height field for all ground-level land prevents overlapping island surfaces.
     for (let x = -58; x <= 62; x += 0.48) {
-      for (let z = -68; z <= 38; z += 0.48) {
+      for (let z = -144; z <= 38; z += 0.48) {
         let interior = 0;
         for (const [cx, cz, radius] of land)
           interior = Math.max(interior, 1 - Math.hypot(x - cx, z - cz) / radius);
@@ -636,6 +652,60 @@ function Boat({ reduced }: { reduced: boolean }) {
     </group>
   );
 }
+function FinaleDetails({ reduced }: { reduced: boolean }) {
+  const sleeve = useRef<THREE.Group>(null);
+  const shimmer = useRef<THREE.Group>(null);
+  const time = useRef(0);
+  const figure = useMemo(() => person(0, 0, 0), []);
+  const reflections = useMemo(() => {
+    const random = seeded(1076);
+    return Array.from({ length: 240 }, (_, i): Block => {
+      const z = -67 - random() * 59;
+      const center = 49 + (z + 67) * 0.3;
+      return { p: [center + (random() - 0.5) * 12, 0.015, z],
+        s: [0.2 + random() * 1.4, 0.012, 0.035 + random() * 0.045],
+        c: ["#8fa99d", "#647f7c", "#b0bca4"][i % 3] };
+    });
+  }, []);
+  useFrame((_, delta) => {
+    if (reduced) return;
+    time.current += delta;
+    if (sleeve.current) sleeve.current.rotation.z = Math.sin(time.current * 0.7) * 0.045;
+    if (shimmer.current) shimmer.current.position.x = Math.sin(time.current * 0.19) * 0.18;
+  });
+  return <group name="finale-details">
+    <group position={[49, 1.2, -64]} rotation={[0, Math.PI, 0]}>
+      <Blocks blocks={figure} />
+      <group ref={sleeve} position={[-0.38, 1, 0]}>
+        <mesh position={[-0.1, -0.28, 0]} castShadow>
+          <boxGeometry args={[0.3, 0.5, 0.35]} />
+          <meshStandardMaterial color="#c8ceb8" roughness={0.9} />
+        </mesh>
+      </group>
+    </group>
+    <Lantern position={[53, 1.2, -62]} />
+    <Lantern position={[44, 1.2, -129]} />
+    <mesh position={[40.45, 3.3, -130.04]}>
+      <boxGeometry args={[1.15, 1.8, 0.12]} />
+      <meshStandardMaterial color="#e9c78b" emissive="#ffb967" emissiveIntensity={1.3} />
+    </mesh>
+    <group ref={shimmer}><Blocks blocks={reflections} luminous /></group>
+    {[-78, -108].map((z) => (
+      <Billboard key={z} position={[40, 2.3, z]}>
+        <mesh>
+          <planeGeometry args={[42, 4]} />
+          <shaderMaterial transparent depthWrite={false}
+            vertexShader={`varying vec2 vUv;
+              void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`}
+            fragmentShader={`varying vec2 vUv;
+              void main(){vec2 p=(vUv-0.5)*2.0;
+              float a=exp(-dot(p*vec2(1.3,2.0),p*vec2(1.3,2.0))*2.0);
+              gl_FragColor=vec4(0.49,0.64,0.63,a*0.12);}`} />
+        </mesh>
+      </Billboard>
+    ))}
+  </group>;
+}
 function Dancer({ reduced }: { reduced: boolean }) {
   const ref = useRef<THREE.Group>(null);
   const blocks = useMemo(() => person(0, 0, 0, "dance"), []);
@@ -657,26 +727,31 @@ type WorldProps = {
   paused: boolean;
   onReady: () => void;
   onTravel: (moving: boolean) => void;
+  onSettle: (settled: boolean) => void;
 };
-function CameraRig({ chapter, reset, overviewMode, reduced, onTravel }: WorldProps) {
+function CameraRig({ chapter, reset, overviewMode, reduced, onTravel, onSettle }: WorldProps) {
   const controls = useRef<ComponentRef<typeof OrbitControls>>(null);
   const { camera } = useThree();
   const flight = useRef<{
     start: THREE.Vector3; look: THREE.Vector3; end: THREE.Vector3;
     target: THREE.Vector3; elapsed: number; duration: number; altitude: number;
+    finale: boolean;
   } | null>(null);
   useEffect(() => {
     if (!controls.current) return;
-    const view = overviewMode ? overview : chapters[chapter];
+    onSettle(false);
+    const finale = chapter === 6 && !overviewMode;
+    const view = overviewMode ? overview : finale && !reduced ? finaleCloseup : chapters[chapter];
     const end = new THREE.Vector3(...view.camera);
     const target = new THREE.Vector3(...view.target);
     const distance = camera.position.distanceTo(end);
-    if (reduced || distance < 0.05) {
+    if (reduced || (distance < 0.05 && !finale)) {
       camera.position.copy(end);
       controls.current.target.copy(target);
       controls.current.update();
       flight.current = null;
       onTravel(false);
+      onSettle(finale);
       return;
     }
     // Lift above every roof before crossing the lake, then approach the viewpoint.
@@ -684,15 +759,29 @@ function CameraRig({ chapter, reset, overviewMode, reduced, onTravel }: WorldPro
       start: camera.position.clone(), look: controls.current.target.clone(),
       end, target, elapsed: 0, duration: Math.min(6.5, 3 + distance / 35),
       altitude: Math.max(64, camera.position.y, end.y) + 6,
+      finale,
     };
     onTravel(true);
-  }, [chapter, reset, overviewMode, reduced, camera, onTravel]);
+  }, [chapter, reset, overviewMode, reduced, camera, onTravel, onSettle]);
   useFrame((_, delta) => {
     const f = flight.current, orbit = controls.current;
     if (!f || !orbit) return;
     f.elapsed += Math.min(delta, 0.05);
-    const t = Math.min(1, f.elapsed / f.duration);
     const ease = (v: number) => v * v * v * (v * (v * 6 - 15) + 10);
+    // After arriving at the person, hold briefly and reveal the lake in one slow pullback.
+    if (f.finale && f.elapsed >= f.duration) {
+      const reveal = ease(THREE.MathUtils.clamp((f.elapsed - f.duration - 1.6) / 9, 0, 1));
+      camera.position.lerpVectors(f.end, new THREE.Vector3(...chapters[6].camera), reveal);
+      orbit.target.lerpVectors(f.target, new THREE.Vector3(...chapters[6].target), reveal);
+      orbit.update();
+      if (reveal === 1) {
+        flight.current = null;
+        onTravel(false);
+        onSettle(true);
+      }
+      return;
+    }
+    const t = Math.min(1, f.elapsed / f.duration);
     if (t < 0.25) {
       camera.position.copy(f.start);
       camera.position.y = THREE.MathUtils.lerp(f.start.y, f.altitude, ease(t / 0.25));
@@ -713,7 +802,7 @@ function CameraRig({ chapter, reset, overviewMode, reduced, onTravel }: WorldPro
   return <OrbitControls ref={controls} makeDefault enablePan={false}
     enableDamping={false} minDistance={12} maxDistance={260}
     minPolarAngle={0.08} maxPolarAngle={1.48}
-    onStart={() => { flight.current = null; onTravel(false); }} />;
+    onStart={() => { flight.current = null; onTravel(false); onSettle(false); }} />;
 }
 function Scene(props: WorldProps) {
   const { reduced, paused, onReady } = props;
@@ -740,11 +829,12 @@ function Scene(props: WorldProps) {
       {locations.map((position, kind) => (
         <group key={kind} position={position} name={`landmark-${kind}`}>
           <Landmark kind={kind} />
-          <Lantern position={kind === 1 ? [0, 8, 1] : [4, 1, 4]} />
+          {kind !== 6 && <Lantern position={kind === 1 ? [0, 8, 1] : [4, 1, 4]} />}
           {kind === 2 && <Dancer reduced={still} />}
           {(kind === 0 || kind === 4) && <Boat reduced={still} />}
         </group>
       ))}
+      <FinaleDetails reduced={still} />
       <Sparkles count={100} scale={[120, 8, 110]} position={[0, 3, -15]}
         size={1.8} speed={still ? 0 : 0.2} color="#d7d6a0" />
       <CameraRig {...props} />
