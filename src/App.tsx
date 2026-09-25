@@ -20,6 +20,7 @@ import {
   Moon,
   Pause,
   Play,
+  Map,
 } from "lucide-react";
 import { chapters, numerals } from "./chapters";
 const World = lazy(() => import("./World"));
@@ -48,8 +49,8 @@ class WorldLoaderBoundary extends Component<
 }
 export default function App() {
   const [selected, setSelected] = useState(0),
-    [scene, setScene] = useState(0),
-    [transition, setTransition] = useState(false),
+    [traveling, setTraveling] = useState(false),
+    [overviewMode, setOverviewMode] = useState(false),
     [reset, setReset] = useState(0),
     [ready, setReady] = useState(false),
     [full, setFull] = useState(false),
@@ -58,36 +59,14 @@ export default function App() {
     () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
   const [help, setHelp] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined),
-    end = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const dialog = useRef<HTMLDialogElement>(null),
     nav = useRef<HTMLDivElement>(null);
   const onReady = useCallback(() => setReady(true), []);
-  const go = useCallback(
-    (i: number) => {
-      clearTimeout(timer.current);
-      clearTimeout(end.current);
-      setSelected(i);
-      if (reduced) {
-        setScene(i);
-        setTransition(false);
-        return;
-      }
-      setTransition(true);
-      timer.current = setTimeout(() => {
-        setScene(i);
-        end.current = setTimeout(() => setTransition(false), 700);
-      }, 350);
-    },
-    [reduced],
-  );
-  useEffect(
-    () => () => {
-      clearTimeout(timer.current);
-      clearTimeout(end.current);
-    },
-    [],
-  );
+  const go = useCallback((i: number) => {
+    setSelected(i);
+    setOverviewMode(false);
+    setReset((v) => v + 1);
+  }, []);
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const change = () => setReduced(media.matches);
@@ -116,7 +95,7 @@ export default function App() {
   };
   const chapter = chapters[selected];
   return (
-    <main className={`app ${transition ? "transitioning" : ""}`}>
+    <main className="app">
       <WorldLoaderBoundary onError={onReady}>
         <Suspense
           fallback={
@@ -126,10 +105,12 @@ export default function App() {
           }
         >
           <World
-            chapter={scene}
+            chapter={selected}
             reset={reset}
-            enabled={!transition}
-            reduced={reduced || paused}
+            overviewMode={overviewMode}
+            reduced={reduced}
+            paused={paused}
+            onTravel={setTraveling}
             onReady={onReady}
           />
         </Suspense>
@@ -139,7 +120,6 @@ export default function App() {
           月色将至 <span>正在构筑山水</span>
         </div>
       )}
-      <div className="scene-veil" />
       <div className="vignette" />
       <header className="header">
         <a
@@ -159,7 +139,7 @@ export default function App() {
           </span>
         </a>
         <div className="edition">
-          一首宋词 · 七重月境<span>A JOURNEY THROUGH SU SHI’S POETRY</span>
+          一片山河 · 七处诗境<span>ONE WORLD, SEVEN VIEWS</span>
         </div>
         <button
           className="poem-button"
@@ -198,10 +178,18 @@ export default function App() {
       </section>
       <div className="scene-caption">
         <span className="caption-line" />
-        <span>{chapter.title}</span>
+        <span>{overviewMode ? "山河全境" : chapter.title}</span>
         <small>月境 {String(selected + 1).padStart(2, "0")} / 07</small>
       </div>
       <div className="tools" aria-label="观景工具">
+        <button
+          onClick={() => setOverviewMode((v) => !v)}
+          aria-label={overviewMode ? "返回诗句视角" : "俯瞰全境"}
+          title={overviewMode ? "返回诗句视角" : "俯瞰全境"}
+          aria-pressed={overviewMode}
+        >
+          <Map size={17} strokeWidth={1.3} />
+        </button>
         <button
           onClick={() => setHelp(!help)}
           aria-label="观景操作说明"
@@ -210,7 +198,7 @@ export default function App() {
           <Move size={17} strokeWidth={1.3} />
         </button>
         <button
-          onClick={() => setReset((v) => v + 1)}
+          onClick={() => go(selected)}
           aria-label="恢复最佳视角"
           title="恢复最佳视角"
         >
@@ -247,6 +235,10 @@ export default function App() {
           滚轮 · 远近观景
           <br />
           点击诗句 · 移步换景
+          <br />
+          俯瞰全境 · 看见山河相连
+          <br />
+          镜头行进时拖动 · 停下观景
         </div>
       )}
       <footer className="bottom">
@@ -254,7 +246,9 @@ export default function App() {
           <span>
             <i /> 以诗为径，循月而行
           </span>
-          <span className="nav-hint">点击诗句，走入下一重月境</span>
+          <span className="nav-hint" role="status">
+            {traveling ? `循月而行 · 正前往${overviewMode ? "山河全境" : chapter.title}` : "点击诗句，沿同一片山河漫游"}
+          </span>
           <div className="arrows">
             <button
               disabled={selected === 0}

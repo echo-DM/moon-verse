@@ -77,17 +77,6 @@ a {
       rgba(7, 22, 28, 0.18) 100%
     );
 }
-.scene-veil {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: #102b33;
-  opacity: 0;
-  transition: opacity 0.35s;
-}
-.transitioning .scene-veil {
-  opacity: 0.9;
-}
 .header {
   position: absolute;
   left: 4.4%;
@@ -313,6 +302,10 @@ h1 span {
 .tools button:hover {
   background: #b0c4bc18;
   color: #eee6c9;
+}
+.tools button[aria-pressed="true"] {
+  color: #e4d7b4;
+  background: #99a48a20;
 }
 .help {
   position: absolute;

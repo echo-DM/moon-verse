@@ -17,7 +17,7 @@ import {
   Sparkles,
 } from "@react-three/drei";
 import * as THREE from "three";
-import { chapters } from "./chapters";
+import { chapters, overview } from "./chapters";
 
 type Block = {
   p: [number, number, number];
@@ -324,16 +324,87 @@ function island(cx: number, cz: number, r: number, seed: number): Block[] {
     }
   return b;
 }
-function Terrain({ chapter }: { chapter: number }) {
+// Fixed world coordinates; poetry navigation never rebuilds or hides landmarks.
+const locations: [number, number, number][] = [
+  [-32, 0, 21], [-16, 26, -44], [-3, 0, 8], [22, 0, -7],
+  [37, 0, 26], [0, 0, -42], [40, 0, -51],
+];
+function Landmark({ kind }: { kind: number }) {
   const blocks = useMemo(() => {
     const b: Block[] = [];
-    const rand = seeded(300 + chapter);
+    if (kind === 1) {
+      b.push(
+        ...island(3, -1, 8, 22).map((v) => ({
+          ...v,
+          p: [v.p[0], v.p[1] + 7, v.p[2]] as [number, number, number],
+        })),
+      );
+      b.push(...architecture(3, 8, -1, 1.2, 2));
+      b.push(...architecture(-10, 5, -9, 0.65, 1));
+      b.push(...architecture(14, 6, -13, 0.75, 2));
+      b.push(
+        ...bridge(-3, 3, 13).map((v) => ({
+          ...v,
+          p: [v.p[0], v.p[1] + 6, v.p[2]] as [number, number, number],
+        })),
+      );
+    } else if (kind === 2) {
+      b.push(...architecture(4, 1, -5, 1, 1));
+      for (let x = -5; x < 5; x += 0.9)
+        for (let z = -3; z < 5; z += 0.9)
+          b.push({
+            p: [x, 1, z],
+            s: [0.87, 0.2, 0.87],
+            c: Math.round(x * 10 + z * 10) % 3 === 0 ? "#8a9283" : "#6e8079",
+          });
+      b.push(...tree(-7, 1, -1, 1.5, 33), ...tree(9, 1, -4, 1.15, 44, true));
+    } else if (kind === 3) {
+      b.push(...architecture(3, 1, -1, 1.4, 2, true));
+      b.push(...tree(-5, 1, -5, 1.45, 53), ...tree(10, 1, -6, 1.2, 45, true));
+      b.push(...person(3, 1.9, 2, "sit"));
+    } else if (kind === 6) {
+      b.push(
+        ...architecture(-12, 1, 2, 0.9, 1, true),
+        ...architecture(11, 1, -8, 1, 2, true),
+      );
+      b.push(...tree(-17, 1, 0, 1.3, 98), ...tree(16, 1, -7, 1.3, 100, true));
+      b.push(...person(-9, 1.2, 5), ...person(8, 1.2, -3));
+    } else {
+      b.push(...architecture(8, 1, -1, 1.1, kind === 0 ? 2 : 1));
+      b.push(...bridge(-3, 3, 17));
+      b.push(
+        ...tree(15, 1, -1, 1.5, 3),
+        ...tree(2, 1, -6, 1.35, 11),
+        ...tree(-15, 1, -4, 1.6, 5, true),
+      );
+      b.push(
+        ...person(
+          kind === 5 ? -9 : 3,
+          kind === 5 ? 2 : 1.3,
+          4,
+          kind === 0 ? "raise" : "still",
+        ),
+      );
+      if (kind === 5) b.push(...person(3, 1.5, 4));
+      if (kind === 0) {
+        b.push(...architecture(-19, 2, -22, 0.65, 2));
+        b.push(...tree(10, 1, 7, 0.85, 42, true));
+      }
+    }
+    return b;
+  }, [kind]);
+  return <Blocks blocks={blocks} />;
+}
+function Landscape() {
+  const blocks = useMemo(() => {
+    const b: Block[] = [];
+    const rand = seeded(300);
     // Distant stepped peaks, with a distinct readable voxel silhouette.
     for (let m = 0; m < 13; m++) {
-      const cx = -48 + m * 7.4,
-        cz = -25 - (m % 3) * 6,
-        radius = 5 + rand() * 5,
-        peak = 5 + rand() * 9;
+      const cx = -85 + m * 14,
+        cz = -88 - (m % 3) * 9,
+        radius = 8 + rand() * 5,
+        peak = 10 + rand() * 15;
       for (let x = -radius; x < radius; x += 0.7)
         for (let z = -radius; z < radius; z += 0.7) {
           const d = Math.sqrt(x * x + z * z) / radius;
@@ -351,72 +422,47 @@ function Terrain({ chapter }: { chapter: number }) {
           });
         }
     }
-    if (chapter === 1) {
-      b.push(
-        ...island(3, -1, 8, 22).map((v) => ({
-          ...v,
-          p: [v.p[0], v.p[1] + 7, v.p[2]] as [number, number, number],
-        })),
-      );
-      b.push(...architecture(3, 8, -1, 1.2, 2));
-      b.push(...architecture(-10, 5, -9, 0.65, 1));
-      b.push(...architecture(14, 6, -13, 0.75, 2));
-      b.push(
-        ...bridge(-3, 3, 13).map((v) => ({
-          ...v,
-          p: [v.p[0], v.p[1] + 6, v.p[2]] as [number, number, number],
-        })),
-      );
-    } else if (chapter === 2) {
-      b.push(...island(0, 0, 11, 30));
-      b.push(...architecture(4, 1, -5, 1, 1));
-      for (let x = -5; x < 5; x += 0.9)
-        for (let z = -3; z < 5; z += 0.9)
-          b.push({
-            p: [x, 1, z],
-            s: [0.87, 0.2, 0.87],
-            c: Math.round(x * 10 + z * 10) % 3 === 0 ? "#8a9283" : "#6e8079",
-          });
-      b.push(...tree(-7, 1, -1, 1.5, 33), ...tree(9, 1, -4, 1.15, 44, true));
-    } else if (chapter === 3) {
-      b.push(...island(3, -1, 8, 40), ...architecture(3, 1, -1, 1.4, 2, true));
-      b.push(...tree(-5, 1, -5, 1.45, 53), ...tree(10, 1, -6, 1.2, 45, true));
-      b.push(...person(3, 1.9, 2, "sit"));
-    } else if (chapter === 6) {
-      b.push(...island(-12, 3, 7, 65), ...island(11, -7, 8, 88));
-      b.push(
-        ...architecture(-12, 1, 2, 0.9, 1, true),
-        ...architecture(11, 1, -8, 1, 2, true),
-      );
-      b.push(...tree(-17, 1, 0, 1.3, 98), ...tree(16, 1, -7, 1.3, 100, true));
-      b.push(...person(-9, 1.2, 5), ...person(8, 1.2, -3));
-    } else {
-      b.push(...island(7, 0, 9, 12), ...island(-14, -3, 6, 19));
-      b.push(...architecture(8, 1, -1, 1.1, chapter === 0 ? 2 : 1));
-      b.push(...bridge(-3, 3, 17));
-      b.push(
-        ...tree(15, 1, -1, 1.5, 3),
-        ...tree(2, 1, -6, 1.35, 11),
-        ...tree(-15, 1, -4, 1.6, 5, true),
-      );
-      b.push(
-        ...person(
-          chapter === 5 ? -9 : 3,
-          chapter === 5 ? 2 : 1.3,
-          4,
-          chapter === 0 ? "raise" : "still",
-        ),
-      );
-      if (chapter === 5) b.push(...person(3, 1.5, 4));
-      if (chapter === 0) {
-        b.push(...architecture(-19, 2, -22, 0.65, 2));
-        b.push(...tree(10, 1, 7, 0.85, 42, true));
+    // A continuous wooded shore joins the courtyard, red pavilion and north bank.
+    const shore: [number, number][] = [[-34, 10], [-24, 5], [-14, 3],
+      [6, 1], [15, -6], [20, -18], [15, -28], [6, -36],
+      [21, -45], [31, -52], [44, -58], [51, -46]];
+    const land: [number, number, number][] = [
+      ...shore.map(([x, z]): [number, number, number] => [x, z, 6.8]),
+      [-25, 21, 9], [-46, 18, 6], [-51, -1, 5], [-3, 8, 11],
+      [25, -8, 8], [44, 26, 9], [23, 23, 6], [7, -42, 9],
+      [-14, -45, 6], [28, -48, 7], [51, -58, 8],
+      [30, 3, 6.8], [37, 14, 6.8],
+    ];
+    // One height field for all ground-level land prevents overlapping island surfaces.
+    for (let x = -58; x <= 62; x += 0.48) {
+      for (let z = -68; z <= 38; z += 0.48) {
+        let interior = 0;
+        for (const [cx, cz, radius] of land)
+          interior = Math.max(interior, 1 - Math.hypot(x - cx, z - cz) / radius);
+        if (interior <= 0) continue;
+        const top = 0.3 + Math.floor(interior * 3) * 0.22;
+        b.push({ p: [x, top - 0.8, z], s: [0.48, 1.6, 0.48],
+          c: stone[Math.floor(rand() * 4)] });
+        if (interior < 0.15 && rand() > 0.55)
+          b.push({ p: [x, top + 0.05, z], s: [0.42, 0.18, 0.42],
+            c: jade[Math.floor(rand() * 5)] });
       }
     }
-    // Foreground edge anchors the cinematic view.
-    b.push(...island(-21, 16, 7, 421), ...tree(-20, 1, 14, 1.8, 441));
+    shore.forEach(([x, z], i) => {
+      b.push(...tree(x - 2, 1, z - 3, 0.8 + rand() * 0.4, 900 + i));
+    });
+    // Stone footpaths follow the shoreline rather than isolated stage platforms.
+    for (let i = 1; i < shore.length; i++) {
+      const [ax, az] = shore[i - 1], [bx, bz] = shore[i];
+      const steps = Math.ceil(Math.hypot(bx - ax, bz - az) / 0.5);
+      for (let j = 0; j <= steps; j++) b.push({
+        p: [ax + (bx - ax) * j / steps, 1, az + (bz - az) * j / steps],
+        s: [0.55, 0.14, 1.3], c: stone[j % 4],
+        r: -Math.atan2(bz - az, bx - ax),
+      });
+    }
     return b;
-  }, [chapter]);
+  }, []);
   return <Blocks blocks={blocks} />;
 }
 function Lantern({ position }: { position: [number, number, number] }) {
@@ -455,9 +501,9 @@ function Water({ reduced }: { reduced: boolean }) {
   const lines = useMemo(() => {
     const r = seeded(83);
     const b: Block[] = [];
-    for (let i = 0; i < 700; i++) {
-      const x = (r() - 0.5) * 110,
-        z = (r() - 0.5) * 100;
+    for (let i = 0; i < 1800; i++) {
+      const x = (r() - 0.5) * 210,
+        z = (r() - 0.5) * 210;
       const path = Math.abs(x + z * 0.37 + 3) < 3 + Math.abs(z) * 0.07;
       b.push({
         p: [x, -0.02 + r() * 0.025, z],
@@ -493,9 +539,7 @@ function Water({ reduced }: { reduced: boolean }) {
     </group>
   );
 }
-function Moon({ chapter, reduced }: { chapter: number; reduced: boolean }) {
-  const phase = useRef<THREE.Mesh>(null);
-  const p = chapters[chapter].moon;
+function Moon() {
   const craters = useMemo(() => {
     const r = seeded(4),
       b: Block[] = [];
@@ -511,12 +555,8 @@ function Moon({ chapter, reduced }: { chapter: number; reduced: boolean }) {
     }
     return b;
   }, []);
-  useFrame(({ clock }) => {
-    if (phase.current && !reduced)
-      phase.current.position.x = Math.sin(clock.elapsedTime * 0.18) * 2.5 + 2.5;
-  });
   return (
-    <group position={p}>
+    <group position={[0, 88, -170]} scale={4}>
       <Billboard>
         <mesh>
           <planeGeometry args={[19, 19]} />
@@ -540,24 +580,18 @@ function Moon({ chapter, reduced }: { chapter: number; reduced: boolean }) {
         <meshBasicMaterial color="#e5e6cb" toneMapped={false} fog={false} />
       </mesh>
       <Blocks blocks={craters} luminous fog={false} />
-      {chapter === 5 && (
-        <mesh ref={phase} position={[2, 0, 1.6]}>
-          <sphereGeometry args={[3.03, 48, 32]} />
-          <meshBasicMaterial color="#18343c" />
-        </mesh>
-      )}
     </group>
   );
 }
-function Clouds({ chapter, reduced }: { chapter: number; reduced: boolean }) {
+function Clouds({ reduced }: { reduced: boolean }) {
   const ref = useRef<THREE.Group>(null);
   const blocks = useMemo(() => {
     const r = seeded(67);
-    return Array.from({ length: chapter === 1 ? 55 : 22 }, (_, i) => ({
+    return Array.from({ length: 95 }, (_, i) => ({
       p: [
-        (r() - 0.5) * 68,
-        chapter === 1 ? 4 + r() * 3 : 15 + r() * 4,
-        chapter === 1 ? -14 + r() * 30 : -18 - r() * 25,
+        (r() - 0.5) * 145,
+        24 + r() * 10,
+        -25 - r() * 45,
       ] as [number, number, number],
       s: [2 + r() * 5, 0.15 + r() * 0.5, 1 + r() * 3] as [
         number,
@@ -566,7 +600,7 @@ function Clouds({ chapter, reduced }: { chapter: number; reduced: boolean }) {
       ],
       c: ["#afc9bf", "#b1c8bf", "#a4c2bb"][i % 3],
     }));
-  }, [chapter]);
+  }, []);
   useFrame(({ clock }) => {
     if (ref.current && !reduced)
       ref.current.position.x = Math.sin(clock.elapsedTime * 0.04) * 3;
@@ -615,171 +649,105 @@ function Dancer({ reduced }: { reduced: boolean }) {
     </group>
   );
 }
-function CameraRig({
-  chapter,
-  reset,
-  enabled,
-  reduced,
-}: {
+type WorldProps = {
   chapter: number;
   reset: number;
-  enabled: boolean;
+  overviewMode: boolean;
   reduced: boolean;
-}) {
+  paused: boolean;
+  onReady: () => void;
+  onTravel: (moving: boolean) => void;
+};
+function CameraRig({ chapter, reset, overviewMode, reduced, onTravel }: WorldProps) {
   const controls = useRef<ComponentRef<typeof OrbitControls>>(null);
   const { camera } = useThree();
-  const active = useRef(true);
-  const dest = useMemo(
-    () => new THREE.Vector3(...chapters[chapter].camera),
-    [chapter],
-  );
-  const target = useMemo(
-    () => new THREE.Vector3(...chapters[chapter].target),
-    [chapter],
-  );
+  const flight = useRef<{
+    start: THREE.Vector3; look: THREE.Vector3; end: THREE.Vector3;
+    target: THREE.Vector3; elapsed: number; duration: number; altitude: number;
+  } | null>(null);
   useEffect(() => {
-    active.current = true;
-  }, [chapter, reset, dest]);
-  useFrame((_, delta) => {
-    if (!active.current || !controls.current) return;
-    const a = reduced ? 1 : 1 - Math.exp(-delta * 5);
-    camera.position.lerp(dest, a);
-    controls.current.target.lerp(target, a);
-    controls.current.update();
-    if (
-      camera.position.distanceTo(dest) < 0.03 &&
-      controls.current.target.distanceTo(target) < 0.03
-    ) {
-      camera.position.copy(dest);
+    if (!controls.current) return;
+    const view = overviewMode ? overview : chapters[chapter];
+    const end = new THREE.Vector3(...view.camera);
+    const target = new THREE.Vector3(...view.target);
+    const distance = camera.position.distanceTo(end);
+    if (reduced || distance < 0.05) {
+      camera.position.copy(end);
       controls.current.target.copy(target);
       controls.current.update();
-      active.current = false;
+      flight.current = null;
+      onTravel(false);
+      return;
+    }
+    // Lift above every roof before crossing the lake, then approach the viewpoint.
+    flight.current = {
+      start: camera.position.clone(), look: controls.current.target.clone(),
+      end, target, elapsed: 0, duration: Math.min(6.5, 3 + distance / 35),
+      altitude: Math.max(64, camera.position.y, end.y) + 6,
+    };
+    onTravel(true);
+  }, [chapter, reset, overviewMode, reduced, camera, onTravel]);
+  useFrame((_, delta) => {
+    const f = flight.current, orbit = controls.current;
+    if (!f || !orbit) return;
+    f.elapsed += Math.min(delta, 0.05);
+    const t = Math.min(1, f.elapsed / f.duration);
+    const ease = (v: number) => v * v * v * (v * (v * 6 - 15) + 10);
+    if (t < 0.25) {
+      camera.position.copy(f.start);
+      camera.position.y = THREE.MathUtils.lerp(f.start.y, f.altitude, ease(t / 0.25));
+    } else if (t < 0.75) {
+      camera.position.lerpVectors(f.start, f.end, ease((t - 0.25) / 0.5));
+      camera.position.y = f.altitude;
+    } else {
+      camera.position.copy(f.end);
+      camera.position.y = THREE.MathUtils.lerp(f.altitude, f.end.y, ease((t - 0.75) / 0.25));
+    }
+    orbit.target.lerpVectors(f.look, f.target, ease(t));
+    orbit.update();
+    if (t === 1) {
+      flight.current = null;
+      onTravel(false);
     }
   });
-  return (
-    <OrbitControls
-      ref={controls}
-      makeDefault
-      enabled={enabled}
-      enablePan={false}
-      enableDamping
-      dampingFactor={0.06}
-      minDistance={19}
-      maxDistance={80}
-      minPolarAngle={0.5}
-      maxPolarAngle={1.45}
-      minAzimuthAngle={-0.55}
-      maxAzimuthAngle={1.25}
-      onStart={() => {
-        active.current = false;
-      }}
-    />
-  );
+  return <OrbitControls ref={controls} makeDefault enablePan={false}
+    enableDamping={false} minDistance={12} maxDistance={260}
+    minPolarAngle={0.08} maxPolarAngle={1.48}
+    onStart={() => { flight.current = null; onTravel(false); }} />;
 }
-function Scene({
-  chapter,
-  reset,
-  enabled,
-  reduced,
-  onReady,
-}: {
-  chapter: number;
-  reset: number;
-  enabled: boolean;
-  reduced: boolean;
-  onReady: () => void;
-}) {
-  useEffect(() => {
-    onReady();
-  }, [onReady]);
+function Scene(props: WorldProps) {
+  const { reduced, paused, onReady } = props;
+  const still = reduced || paused;
+  useEffect(() => { onReady(); }, [onReady]);
   return (
     <>
       <SoftShadows size={12} samples={8} />
-      <fog attach="fog" args={["#15343d", 35, 115]} />
+      <fog attach="fog" args={["#15343d", 100, 330]} />
       <ambientLight intensity={0.7} color="#aac7d1" />
       <hemisphereLight args={["#d6e5d7", "#173c41", 1.35]} />
-      <directionalLight
-        position={[-12, 28, -10]}
-        intensity={3.3}
-        color="#d5e4df"
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-camera-left={-35}
-        shadow-camera-right={35}
-        shadow-camera-top={35}
-        shadow-camera-bottom={-35}
-        shadow-normalBias={0.06}
-      />
-      <directionalLight
-        position={[15, 12, 20]}
-        intensity={1.3}
-        color="#7aa7b1"
-      />
-      <Stars
-        radius={100}
-        depth={25}
-        count={650}
-        factor={1.4}
-        saturation={0}
-        fade
-        speed={reduced ? 0 : 0.12}
-      />
-      <Moon chapter={chapter} reduced={reduced} />
-      <Water reduced={reduced} />
-      <Terrain chapter={chapter} />
-      <Clouds chapter={chapter} reduced={reduced} />
-      {(chapter === 0 || chapter === 4 || chapter === 5) && (
-        <>
-          <Lantern position={[4, 1, 4]} />
-          <Lantern position={[11, 1, 2]} />
-          <Lantern position={[-10, 1.4, 3]} />
-        </>
-      )}
-      {chapter === 1 && (
-        <>
-          <Lantern position={[0, 8, 1]} />
-          <Lantern position={[6, 8, 1]} />
-        </>
-      )}
-      {chapter === 2 && (
-        <>
-          <Dancer reduced={reduced} />
-          <Lantern position={[-4, 1, 3]} />
-          <Lantern position={[4, 1, -3]} />
-        </>
-      )}
-      {chapter === 3 && (
-        <>
-          <Lantern position={[2, 2, 2]} />
-          <pointLight
-            position={[3, 5, 1]}
-            color="#ffc485"
-            intensity={40}
-            distance={10}
-          />
-        </>
-      )}
-      {chapter === 6 && (
-        <>
-          <Lantern position={[-10, 1, 4]} />
-          <Lantern position={[10, 1, -5]} />
-        </>
-      )}
-      {(chapter === 0 || chapter === 4) && <Boat reduced={reduced} />}
-      <Sparkles
-        count={45}
-        scale={[35, 7, 20]}
-        position={[0, 3, 2]}
-        size={1.8}
-        speed={reduced ? 0 : 0.2}
-        color="#d7d6a0"
-      />
-      <CameraRig
-        chapter={chapter}
-        reset={reset}
-        enabled={enabled}
-        reduced={reduced}
-      />
+      <directionalLight position={[0, 100, -80]} intensity={3.3} color="#d5e4df"
+        castShadow shadow-mapSize={[2048, 2048]}
+        shadow-camera-left={-100} shadow-camera-right={100}
+        shadow-camera-top={100} shadow-camera-bottom={-100}
+        shadow-camera-far={300} shadow-normalBias={0.06} />
+      <directionalLight position={[15, 40, 70]} intensity={1.3} color="#7aa7b1" />
+      <Stars radius={240} depth={60} count={850} factor={1.4}
+        saturation={0} fade speed={still ? 0 : 0.12} />
+      <Moon />
+      <Water reduced={still} />
+      <Landscape />
+      <Clouds reduced={still} />
+      {locations.map((position, kind) => (
+        <group key={kind} position={position} name={`landmark-${kind}`}>
+          <Landmark kind={kind} />
+          <Lantern position={kind === 1 ? [0, 8, 1] : [4, 1, 4]} />
+          {kind === 2 && <Dancer reduced={still} />}
+          {(kind === 0 || kind === 4) && <Boat reduced={still} />}
+        </group>
+      ))}
+      <Sparkles count={100} scale={[120, 8, 110]} position={[0, 3, -15]}
+        size={1.8} speed={still ? 0 : 0.2} color="#d7d6a0" />
+      <CameraRig {...props} />
     </>
   );
 }
@@ -806,18 +774,12 @@ function Fallback({ onReady }: { onReady: () => void }) {
     </div>
   );
 }
-export default function World(props: {
-  chapter: number;
-  reset: number;
-  enabled: boolean;
-  reduced: boolean;
-  onReady: () => void;
-}) {
+export default function World(props: WorldProps) {
   const [failed, setFailed] = useState(false);
   return (
     <div
       className="world"
-      aria-label={`${chapters[props.chapter].title}，可拖动旋转的三维月夜景观`}
+      aria-label={`${props.overviewMode ? "山河全境" : chapters[props.chapter].title}，同一片可游览的三维月夜山河`}
     >
       {!failed && (
         <SceneBoundary
@@ -833,7 +795,7 @@ export default function World(props: {
               position: chapters[0].camera,
               fov: 43,
               near: 0.1,
-              far: 240,
+              far: 700,
             }}
             gl={{
               antialias: true,
