@@ -4,3 +4,6 @@ dist/
 .DS_Store
 
 .pnpm-store/
+
+/output/
+/photo/
