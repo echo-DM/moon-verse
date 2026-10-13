@@ -35,6 +35,12 @@ pnpm build
 pnpm preview
 ```
 
+## 部署到 GitHub Pages
+
+在仓库的 **Settings → Pages → Build and deployment → Source** 中选择 **GitHub Actions**。提交并推送到 `main` 后，部署工作流会使用 pnpm 安装锁定的依赖、构建项目并发布 `dist`；也可以在 Actions 页面手动运行。
+
+默认访问地址为 <https://echo-dm.github.io/moon-verse/>。Vite 的 `base` 已设置为 `/moon-verse/`；如果更改仓库名或使用根路径的自定义域名，需要同步修改 `vite.config.ts` 中的 `base`。
+
 ## 如何实现
 
 项目使用 React、TypeScript、Vite 和 React Three Fiber / Three.js。山石、建筑、树木、人物与水面由程序化几何构成。七处景观共用地形、月亮和光照；切换诗句时移动镜头，而不是加载七个互不相连的场景。末幕会先停留在临水人物近景，再拉远呈现两岸与明月。
